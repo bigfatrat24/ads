@@ -1,0 +1,77 @@
+#include <iostream>
+using namespace std;
+
+// Node structure
+struct TreeNode {
+    int key;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(int val) : key(val), left(nullptr), right(nullptr) {}
+};
+
+// Insert a key into the tree
+TreeNode* insert(TreeNode* root, int key) {
+    if (!root) return new TreeNode(key);
+    if (key < root->key)
+        root->left = insert(root->left, key);
+    else if (key > root->key)
+        root->right = insert(root->right, key);
+    return root;
+}
+
+// Search for a key in the tree
+bool search(TreeNode* root, int key) {
+    if (!root) return false;
+    if (root->key == key) return true;
+    if (key < root->key)
+        return search(root->left, key);
+    else
+        return search(root->right, key);
+}
+
+// In-order traversal (optional for verification)
+void inorder(TreeNode* root) {
+    if (!root) return;
+    inorder(root->left);
+    cout << root->key << " ";
+    inorder(root->right);
+}
+
+int main() {
+    TreeNode* root = nullptr;
+    int choice, key;
+
+    do {
+        cout << "\n1. Insert\n2. Search\n3. Display (In-order)\n4. Exit\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice) {
+            case 1:
+                cout << "Enter key to insert: ";
+                cin >> key;
+                root = insert(root, key);
+                break;
+            case 2:
+                cout << "Enter key to search: ";
+                cin >> key;
+                if (search(root, key))
+                    cout << "Key found!" << endl;
+                else
+                    cout << "Key not found!" << endl;
+                break;
+            case 3:
+                cout << "In-order traversal: ";
+                inorder(root);
+                cout << endl;
+                break;
+            case 4:
+                cout << "Exiting..." << endl;
+                break;
+            default:
+                cout << "Invalid choice! Try again." << endl;
+        }
+    } while (choice != 4);
+
+    return 0;
+}
