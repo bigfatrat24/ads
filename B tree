@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class BTreeNode {
+    vector<int> keys;
+    vector<BTreeNode*> children;
+    int t;
+    bool isLeaf;
+
+public:
+    BTreeNode(int _t, bool _isLeaf) : t(_t), isLeaf(_isLeaf) {}
+
+    void insertNonFull(int k) {
+        int i = keys.size() - 1;
+        if (isLeaf) {
+            keys.insert(keys.end(), k);
+            while (i >= 0 && keys[i] > k) {
+                swap(keys[i], keys[i + 1]);
+                i--;
+            }
+        } else {
+            while (i >= 0 && keys[i] > k) i--;
+            if (children[i + 1]->keys.size() == 2 * t - 1) {
+                splitChild(i + 1, children[i + 1]);
+                if (keys[i + 1] < k) i++;
+            }
+            children[i + 1]->insertNonFull(k);
+        }
+    }
+
+    void splitChild(int i, BTreeNode* y) {
+        BTreeNode* z = new BTreeNode(t, y->isLeaf);
+        for (int j = 0; j < t - 1; j++) z->keys.push_back(y->keys[j + t]);
+        if (!y->isLeaf) for (int j = 0; j < t; j++) z->children.push_back(y->children[j + t]);
+        keys.insert(keys.begin() + i, y->keys[t - 1]);
+        children.insert(children.begin() + i + 1, z);
+        y->keys.resize(t - 1);
+    }
+
+    void traverse() {
+        for (int i = 0; i < keys.size(); i++) {
+            if (!isLeaf) children[i]->traverse();
+            cout << keys[i] << " ";
+        }
+        if (!isLeaf) children[keys.size()]->traverse();
+    }
+
+    friend class BTree;
+};
+
+class BTree {
+    BTreeNode* root;
+    int t;
+
+public:
+    BTree(int _t) : root(nullptr), t(_t) {}
+
+    void insert(int k) {
+        if (!root) root = new BTreeNode(t, true);
+        if (root->keys.size() == 2 * t - 1) {
+            BTreeNode* s = new BTreeNode(t, false);
+            s->children.push_back(root);
+            s->splitChild(0, root);
+            root = s;
+        }
+        root->insertNonFull(k);
+    }
+
+    void traverse() {
+        if (root) root->traverse();
+    }
+};
+
+int main() {
+    BTree t(3); // Minimum degree
+    vector<int> keys = {10, 20, 5, 6, 12, 30, 7, 17};
+    for (int k : keys) t.insert(k);
+    t.traverse();
+    return 0;
+}
