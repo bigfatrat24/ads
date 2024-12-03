@@ -1,0 +1,76 @@
+#include <iostream>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+// Node structure for the Trie
+class TrieNode {
+public:
+    unordered_map<char, TrieNode*> children;
+    bool isEndOfWord;
+
+    TrieNode() : isEndOfWord(false) {}
+};
+
+// Suffix Trie class
+class SuffixTrie {
+private:
+    TrieNode* root;
+
+    // Helper function to insert a suffix
+    void insertSuffix(const string& suffix) {
+        TrieNode* current = root;
+        for (char ch : suffix) {
+            if (!current->children[ch]) {
+                current->children[ch] = new TrieNode();
+            }
+            current = current->children[ch];
+        }
+        current->isEndOfWord = true;
+    }
+
+public:
+    SuffixTrie() {
+        root = new TrieNode();
+    }
+
+    // Insert all suffixes of a string into the Trie
+    void insert(const string& text) {
+        for (size_t i = 0; i < text.length(); ++i) {
+            insertSuffix(text.substr(i));
+        }
+    }
+
+    // Search for a substring in the Trie
+    bool search(const string& substring) {
+        TrieNode* current = root;
+        for (char ch : substring) {
+            if (!current->children[ch]) {
+                return false;
+            }
+            current = current->children[ch];
+        }
+        return true;
+    }
+};
+
+int main() {
+    SuffixTrie trie;
+    string text, query;
+
+    cout << "Enter the text: ";
+    cin >> text;
+
+    trie.insert(text);
+
+    cout << "Enter substring to search: ";
+    cin >> query;
+
+    if (trie.search(query)) {
+        cout << "Substring found!" << endl;
+    } else {
+        cout << "Substring not found!" << endl;
+    }
+
+    return 0;
+}
